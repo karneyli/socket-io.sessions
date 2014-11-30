@@ -49,20 +49,18 @@ exports.start = function (options, callback) {
   });
 
   sio.sockets.on('connection', function (socket) {
+    var session = socket.handshake.session;
+
     function sendFoobar(eventName) {
-      socket.handshake.getSession(function (err, session) {
-        socket.emit(eventName, session.foobar);
-      });
+      socket.emit(eventName, session.foobar);
     }
 
     sendFoobar('hey');
 
     socket.on('store this', function (data) {
-      socket.handshake.getSession(function (err, session) {
-        session.foobar = data;
-        socket.handshake.saveSession(session, function () {
-          sendFoobar('stored');
-        });
+      session.foobar = data;
+      session.save(function() { 
+        sendFoobar('stored'); 
       });
     });
   });
